@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" href="data:image/ico;base64,aWNv">
+    <title>音频文件转换为ogg格式</title>
+    <script src="recorder.js"></script>
+    <style type='text/css'>
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin: 1em;
+        }
+
+        audio {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<h1>音频文件转换为ogg格式 16K 单声道</h1>
+<h2>Options</h2>
+
+<div>
+    <label>monitorGain</label>
+    <input id="monitorGain" type="number" value="0"/>
+</div>
+
+<div>
+    <label>recordingGain</label>
+    <input id="recordingGain" type="number" value="1"/>
+</div>
+
+<div>
+    <label>numberOfChannels</label>
+    <input id="numberOfChannels" type="number" value="1"/>
+</div>
+
+<div>
+    <label>encoderSampleRate</label>
+    <input id="encoderSampleRate" type="number" value="16000"/>
+</div>
+
+<div>
+    <label>originalSampleRateOverride</label>
+    <input id="originalSampleRateOverride" type="number" value="16000"/>
+</div>
+
+
+<div>
+    <label>encoderBitRate</label>
+    <input id="encoderBitRate" type="number" value=""/>
+</div>
+
+<div>
+    <label>encoderApplication</label>
+    <input id="encoderApplication" type="number" value=""/>
+</div>
+
+<div>
+    <label>encoderComplexity</label>
+    <input id="encoderComplexity" type="number" value=""/>
+</div>
+
+<!--<div>-->
+    <!--<button id="init" onclick="initBtn()">Init recorder with options</button>-->
+<!--</div>-->
+
+<h2>file upload</h2>
+<input type="file" id="fileInput"/>
+<audio id="audioUpload" controls></audio>
+<br>
+
+<h2>Recorder Commands</h2>
+<!--<button id="pause" onclick="recorder.pause()" >Pause</button>-->
+<!--<button id="resume" onclick="recorder.resume()" >Resume</button>-->
+<button id="stopButton" onclick="recorder.stop()" >Stop</button>
+
+<h2>Recordings</h2>
+<ul id="recordingslist"></ul>
+
+<h2>Log</h2>
+<pre id="log"></pre>
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="index.js"></script>
+</body>
+</html>
