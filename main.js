@@ -103,13 +103,14 @@ async function encoderOgg(data) {
         durationInterval = setInterval(function () {
             let currentTime = sourceNode.context.currentTime
             if(currentTime > recordingDuration){
+                console.warn("currentTime: ", currentTime)
                 data.progressCallback({state: 'done'})
                 recorder.stop()
                 clearInterval(durationInterval)
             }else {
                 data.progressCallback({state: 'recording', currentTime: currentTime})
             }
-        }, 1)
+        }, 500)
 
         recorder.start(sourceNode)
     };

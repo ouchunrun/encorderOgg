@@ -3,10 +3,8 @@
  * 文件上传
  * @type {HTMLElement}
  */
-let audioUpload = document.getElementById('audioUpload')
 let fileInput = document.getElementById('fileInput')
 let audioCtx = new AudioContext();
-let stream
 fileInput.onchange = function () {
 
     /*** {

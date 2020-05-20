@@ -1,0 +1,11 @@
+/bin
+/.project
+/.project.bak
+/.externalToolBuilders/
+/.settings/
+/code/whiteboard/node_modules
+/code/webrtc_H5/node_modules
+/code/webrtc_sdk/node_modules
+/code/webrtc_H5/dist
+/node_modules/
+.idea/
