@@ -32,8 +32,18 @@ progressCallback({state: 'recording', currentTime: currentTime})
   
 - OggOpusEncoderWasmPath：wasm 路径
     - 文件使用位置：encoderWorker.js[1648 行]：wasmBinaryFile
+    - 与 encoderWorker.js 路径保持一致
     
     
-    
+## 使用文件：
+
+
+- main.js
+
+- recorder.js
+
+- encoderWorker.js
+
+- encoderWorker.wasm
 
     
