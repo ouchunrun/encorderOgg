@@ -4,7 +4,6 @@
  * @type {HTMLElement}
  */
 let fileInput = document.getElementById('fileInput')
-let audioCtx = new AudioContext();
 fileInput.onchange = function () {
 
     /*** {
@@ -29,6 +28,7 @@ fileInput.onchange = function () {
         encoderWorkerPath: 'encoderWorker.js',
         // OggOpusEncoderWasmPath: 'encoderWorker.wasm',
     })
+    fileInput.value = "";  // clear input
 };
 
 let progressCallback = function(data){

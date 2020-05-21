@@ -74,6 +74,8 @@ async function encoderOgg(data) {
 
     let fileReader = new FileReader();
     let recordingDuration = data.duration || 30;  // 文件录制时长
+    let audioCtx = new AudioContext();
+
     fileReader.onload = async function (e) {
         let fileBuffer = e.target.result
 
