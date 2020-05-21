@@ -1,4 +1,5 @@
-
+let audio = document.getElementById('audio');
+let link = document.getElementById('linkA')
 /**
  * 文件上传
  * @type {HTMLElement}
@@ -20,7 +21,11 @@ fileInput.onchange = function () {
     fileInput.value = "";  // clear input
 };
 
-let progressCallback = function(data){
+/**
+ * 进度处理
+ * @param data
+ */
+function progressCallback(data){
     let progressShow = document.getElementById('progress')
     if(data.state === 'recording'){
         progressShow.innerHTML = parseInt(data.percent * 100);
@@ -29,18 +34,25 @@ let progressCallback = function(data){
     }
 }
 
-var audio = document.getElementById('audio');
-var link = document.getElementById('linkA')
-let doneCallBack = function(file, blob){
-    var dataBlob = new Blob([blob], {type: 'audio/ogg'});
-    var fileName = new Date().toISOString() + ".ogg";
-    var url = URL.createObjectURL(dataBlob);
+/**
+ * 转换完成后的处理
+ * @param file
+ * @param blob
+ */
+function doneCallBack(file, blob){
+    let dataBlob = new Blob([blob], {type: 'audio/ogg'});
+    let fileName = new Date().toISOString() + ".ogg";
+    let url = URL.createObjectURL(dataBlob);
     audio.src = url;
     link.href = url;
     link.download = fileName;
     link.innerHTML = link.download;
 }
 
-let errorCallBack = function(error) {
+/**
+ * 错误处理
+ * @param error
+ */
+function errorCallBack(error) {
     alert(error.message)
 }
