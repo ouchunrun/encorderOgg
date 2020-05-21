@@ -19,7 +19,7 @@ var Recorder = function (config) {
     bufferLength: 4096,
     encoderApplication: 2049,
     encoderFrameSize: 20,
-    encoderPath: '/to-ogg-worker/encoderWorker.js',
+    encoderPath: '/encoderWorker.js',
     encoderSampleRate: 16000,
     maxFramesPerPage: 40,
     mediaTrackConstraints: true,

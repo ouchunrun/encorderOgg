@@ -12,8 +12,7 @@ function createRecorder (data) {
         encoderSampleRate: data.encoderSampleRate || 16000,
         originalSampleRateOverride: data.encoderSampleRate || 16000,
         recordingDuration: data.recordingDuration || 30000,
-        encoderPath: data.encoderWorkerPath || '/to-ogg-worker/encoderWorker.js',
-        encoderPathWasmPath: data.OggOpusEncoderWasmPath || '/to-ogg-worker/encoderWorker.wasm'
+        encoderPath: data.encoderWorkerPath || 'encoderWorker.js'
     }
     mediaRecorder = new Recorder(options)
     mediaRecorder.recoderOptions = data

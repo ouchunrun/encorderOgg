@@ -41,11 +41,10 @@ function progressCallback(data){
  */
 function doneCallBack(file, blob){
     let dataBlob = new Blob([blob], {type: 'audio/ogg'});
-    let fileName = new Date().toISOString() + ".ogg";
     let url = URL.createObjectURL(dataBlob);
     audio.src = url;
     link.href = url;
-    link.download = fileName;
+    link.download = file.name;
     link.innerHTML = link.download;
 }
 

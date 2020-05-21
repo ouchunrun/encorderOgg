@@ -7,6 +7,9 @@
     <title>音频文件转换为ogg格式</title>
     <script src="recorder.js"></script>
     <style type='text/css'>
+        body{
+            background: antiquewhite;
+        }
         ul {
             list-style: none;
         }
@@ -24,63 +27,56 @@
 </head>
 <body>
 
-<h1>音频文件转换为ogg格式 16K 单声道</h1>
-<h2>Options</h2>
+<div class="content">
+    <h1>音频格式转换</h1>
+    <h2>Options</h2>
 
-<div>
-    <label>monitorGain</label>
-    <input id="monitorGain" type="number" value="0"/>
+    <ul>
+        <li>
+            <label>monitorGain</label>
+            <label for="monitorGain"></label><input id="monitorGain" type="number" value="0"/>
+        </li>
+        <li>
+            <label>recordingGain</label>
+            <label for="recordingGain"></label><input id="recordingGain" type="number" value="1"/>
+        </li>
+        <li>
+            <label>numberOfChannels</label>
+            <label for="numberOfChannels"></label><input id="numberOfChannels" type="number" value="1"/>
+        </li>
+        <li>
+            <label>encoderSampleRate</label>
+            <label for="encoderSampleRate"></label><input id="encoderSampleRate" type="number" value="16000"/>
+        </li>
+    </ul>
+
+
+
+    <h2>file upload</h2>
+    <ul>
+        <li><input type="file" id="fileInput"/></li>
+    </ul>
+    <br>
+
+    <h2>Progress</h2>
+    <div class="Progress">
+        <ul>
+            <li>
+                Current conversion progress:
+                <span id="progress">0</span>
+                (%)
+            </li>
+        </ul>
+    </div>
+
+    <h2>Recordings</h2>
+    <ul id="recordingslist">
+        <li id="recorderFile">
+            <a id="linkA" href=""></a>
+            <audio id="audio" src="" controls></audio>
+        </li>
+    </ul>
 </div>
-
-<div>
-    <label>recordingGain</label>
-    <input id="recordingGain" type="number" value="1"/>
-</div>
-
-<div>
-    <label>numberOfChannels</label>
-    <input id="numberOfChannels" type="number" value="1"/>
-</div>
-
-<div>
-    <label>encoderSampleRate</label>
-    <input id="encoderSampleRate" type="number" value="16000"/>
-</div>
-
-<div>
-    <label>encoderBitRate</label>
-    <input id="encoderBitRate" type="number" value=""/>
-</div>
-
-<div>
-    <label>encoderApplication</label>
-    <input id="encoderApplication" type="number" value=""/>
-</div>
-
-<div>
-    <label>encoderComplexity</label>
-    <input id="encoderComplexity" type="number" value=""/>
-</div>
-
-<h2>file upload</h2>
-<input type="file" id="fileInput"/>
-<br>
-
-<h2>Progress</h2>
-<div class="Progress">
-    <span>Current conversion progress:</span>
-    <span id="progress">0</span>
-    <span>(%)</span>
-</div>
-
-<h2>Recordings</h2>
-<ul id="recordingslist">
-    <li id="recorderFile">
-        <a id="linkA" href=""></a>
-        <audio id="audio" src="" controls></audio>
-    </li>
-</ul>
-
 <script type="text/javascript" src="EncoderOgg.js"></script>
 <script type="text/javascript" src="index.js"></script>
 </body>
