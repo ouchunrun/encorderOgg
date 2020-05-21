@@ -8,7 +8,7 @@ let fileInput = document.getElementById('fileInput')
 fileInput.onchange = function () {
     encoderOgg({
         file: this.files[0],
-        duration: 5,
+        duration: 30,
         progressCallback: progressCallback,
         doneCallBack:doneCallBack,
         errorCallBack: errorCallBack,

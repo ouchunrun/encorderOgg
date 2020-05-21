@@ -1,8 +1,8 @@
 /* eslint-disable default-case */
 
-var AudioContext = window.AudioContext || window.webkitAudioContext
+let AudioContext = window.AudioContext || window.webkitAudioContext
 // Constructor
-var Recorder = function (config) {
+let Recorder = function (config) {
   if (!Recorder.isRecordingSupported()) {
     if (config && config.recoderOptions && config.recoderOptions.errorCallBack) {
       config.recoderOptions.errorCallBack({ message: 'AudioContext or WebAssembly is not supported' })
@@ -19,7 +19,7 @@ var Recorder = function (config) {
     bufferLength: 4096,
     encoderApplication: 2049,
     encoderFrameSize: 20,
-    encoderPath: '/encoderWorker.js',
+    encoderPath: 'encoderWorker.js',
     encoderSampleRate: 16000,
     maxFramesPerPage: 40,
     mediaTrackConstraints: true,
@@ -62,8 +62,8 @@ Recorder.prototype.clearStream = function () {
 
 Recorder.prototype.encodeBuffers = function (inputBuffer) {
   if (this.state === 'recording') {
-    var buffers = []
-    for (var i = 0; i < inputBuffer.numberOfChannels; i++) {
+    let buffers = []
+    for (let i = 0; i < inputBuffer.numberOfChannels; i++) {
       buffers[i] = inputBuffer.getChannelData(i)
     }
 
@@ -125,14 +125,14 @@ Recorder.prototype.loadWorker = function () {
 }
 
 Recorder.prototype.initWorker = function () {
-  var onPage = (this.config.streamPages ? this.streamPage : this.storePage).bind(this)
+  let onPage = (this.config.streamPages ? this.streamPage : this.storePage).bind(this)
 
   this.recordedPages = []
   this.totalLength = 0
   this.loadWorker()
 
   return new Promise((resolve, reject) => {
-    var callback = (e) => {
+    let callback = (e) => {
       switch (e['data']['message']) {
         case 'ready':
           resolve()
@@ -161,9 +161,9 @@ Recorder.prototype.pause = function (flush) {
   if (this.state === 'recording') {
     this.state = 'paused'
     if (flush && this.config.streamPages) {
-      var encoder = this.encoder
+      let encoder = this.encoder
       return new Promise((resolve, reject) => {
-        var callback = (e) => {
+        let callback = (e) => {
           if (e['data']['message'] === 'flushed') {
             encoder.removeEventListener('message', callback)
             this.onpause()
@@ -229,9 +229,9 @@ Recorder.prototype.stop = function () {
     this.sourceNode.disconnect()
     this.clearStream()
 
-    var encoder = this.encoder
+    let encoder = this.encoder
     return new Promise((resolve) => {
-      var callback = (e) => {
+      let callback = (e) => {
         if (e['data']['message'] === 'done') {
           encoder.removeEventListener('message', callback)
           resolve()
@@ -267,7 +267,7 @@ Recorder.prototype.streamPage = function (page) {
 
 Recorder.prototype.finish = function () {
   if (!this.config.streamPages) {
-    var outputData = new Uint8Array(this.totalLength)
+    let outputData = new Uint8Array(this.totalLength)
     this.recordedPages.reduce(function (offset, page) {
       outputData.set(page, offset)
       return offset + page.length
@@ -287,5 +287,62 @@ Recorder.prototype.onpause = function () {}
 Recorder.prototype.onresume = function () {}
 Recorder.prototype.onstart = function () {}
 Recorder.prototype.onstop = function () {}
+
+Recorder.detectBrowser = function () {
+  let navigator = window && window.navigator
+  let result = {}
+  result.browser = null
+  result.version = null
+  result.chromeVersion = null
+  if (typeof window === 'undefined' || !window.navigator) {
+    result.browser = 'Not a browser.'
+    return result
+  }
+
+  let extractVersion = function (uastring, expr, pos) {
+    var match = uastring.match(expr)
+    return match && match.length >= pos && parseInt(match[pos], 10)
+  }
+
+  if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
+    result.browser = 'edge'
+    result.version = extractVersion(navigator.userAgent, /Edge\/(\d+).(\d+)$/, 2)
+  } else if (!navigator.mediaDevices && (!!window.ActiveXObject || 'ActiveXObject' in window || navigator.userAgent.match(/MSIE (\d+)/) || navigator.userAgent.match(/rv:(\d+)/))) {
+    result.browser = 'ie'
+    if (navigator.userAgent.match(/MSIE (\d+)/)) {
+      result.version = extractVersion(navigator.userAgent, /MSIE (\d+).(\d+)/, 1)
+    } else if (navigator.userAgent.match(/rv:(\d+)/)) {
+      result.version = extractVersion(navigator.userAgent, /rv:(\d+).(\d+)/, 1)
+    }
+  } else if (navigator.mozGetUserMedia) {
+    result.browser = 'firefox'
+    result.version = extractVersion(navigator.userAgent, /Firefox\/(\d+)\./, 1)
+  } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
+    let isOpera = !!navigator.userAgent.match(/(OPR|Opera).([\d.]+)/)
+    if (isOpera) {
+      result.browser = 'opera'
+      result.version = extractVersion(navigator.userAgent, /O(PR|pera)\/(\d+)\./, 2)
+      if (navigator.userAgent.match(/Chrom(e|ium)\/([\d.]+)/)[2]) {
+        result.chromeVersion = extractVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
+      }
+    } else {
+      result.browser = 'chrome'
+      result.version = extractVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
+    }
+  } else if ((!navigator.webkitGetUserMedia && navigator.userAgent.match(/AppleWebKit\/([0-9]+)\./)) || (navigator.webkitGetUserMedia && !navigator.webkitRTCPeerConnection)) {
+    if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
+      result.browser = 'safari'
+      result.version = extractVersion(navigator.userAgent, /AppleWebKit\/(\d+)\./, 1)
+    } else { // unknown webkit-based browser.
+      result.browser = 'Unsupported webkit-based browser with GUM support but no WebRTC support.'
+      return result
+    }
+  } else {
+    result.browser = 'Not a supported browser.'
+    return result
+  }
+
+  return result
+}
 
 // export default Recorder

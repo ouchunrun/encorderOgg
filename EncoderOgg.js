@@ -50,8 +50,14 @@ function createRecorder (data) {
  */
 // export default
 async function encoderOgg (data) {
+    let browser = Recorder.detectBrowser()
+    if(browser.browser !== 'chrome' && browser.browser !== 'firefox' && !browser.chromeVersion){
+        data.errorCallBack({ message: 'Current browser does not support audio conversion, please use Chrome or Firefox try again!' })
+        return
+    }
+
     let recorder
-    let MIN_LIMIT = 3
+    let MIN_LIMIT = 3 // 文件时长不低于3秒
     let MXA_LIMIT = 1048576 * 9 // 文件大小要求不超过9M
     let file = data.file
     if (file.size > MXA_LIMIT) {
@@ -62,7 +68,6 @@ async function encoderOgg (data) {
     let url = URL.createObjectURL(file)
     let audioElement = new Audio(url)
     audioElement.addEventListener('loadedmetadata', async function () {
-        // 小于3秒不做转换
         let duration = audioElement.duration
         if (duration < MIN_LIMIT) {
             data.errorCallBack({ message: 'File duration is too short' })
