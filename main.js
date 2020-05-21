@@ -1,5 +1,3 @@
-let recorder
-let durationInterval
 
 /**
  * 创建 mediaRecorder
@@ -44,16 +42,17 @@ function createRecorder(data) {
     return mediaRecorder
 }
 
-
 /**
  * 音频文件转换为ogg
  * @param data
  * @returns {Promise<void>}
  */
 async function encoderOgg(data) {
+    let recorder;
+    let durationInterval;
     let MIN_LIMIT = 3;
     let MXA_LIMIT = 1048576 * 9;  // 文件大小要求不超过9M
-    let file = data.file
+    let file = data.file;
     if(file.size > MXA_LIMIT){
         data.errorCallBack({message: 'File duration is too big!'})
         return
@@ -103,7 +102,6 @@ async function encoderOgg(data) {
         durationInterval = setInterval(function () {
             let currentTime = sourceNode.context.currentTime
             if(currentTime > recordingDuration){
-                console.warn("currentTime: ", currentTime)
                 data.progressCallback({state: 'done'})
                 recorder.stop()
                 clearInterval(durationInterval)

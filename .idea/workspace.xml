@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2bfbde23-3202-4a4d-add2-9428dd748e2c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -16,12 +15,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="571">
-                <caret line="45" lean-forward="true" selection-start-line="45" selection-end-line="45" />
+            <state split_layout="SECOND">
+              <first_editor relative-caret-position="246">
+                <caret line="32" column="25" lean-forward="true" selection-start-line="32" selection-start-column="25" selection-end-line="32" selection-end-column="25" />
               </first_editor>
               <second_editor />
             </state>
@@ -31,17 +30,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+            <state relative-caret-position="-425">
+              <caret line="7" column="25" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="25" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="29" column="56" lean-forward="true" selection-start-line="29" selection-start-column="56" selection-end-line="29" selection-end-column="56" />
+            <state relative-caret-position="300">
+              <caret line="48" column="20" lean-forward="true" selection-start-line="48" selection-start-column="20" selection-end-line="48" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -49,8 +48,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="17" column="81" lean-forward="true" selection-start-line="17" selection-start-column="81" selection-end-line="17" selection-end-column="81" />
+            <state relative-caret-position="575">
+              <caret line="62" column="71" lean-forward="true" selection-start-line="62" selection-start-column="71" selection-end-line="62" selection-end-column="71" />
             </state>
           </provider>
         </entry>
@@ -75,7 +74,6 @@
       <find>audioContext</find>
       <find>initAudioContext</find>
       <find>16e3</find>
-      <find>recorder</find>
       <find>doneCallBack</find>
       <find>&quot;recording&quot;</find>
       <find>encoderPath</find>
@@ -84,10 +82,13 @@
       <find>encoderPathWasmPath</find>
       <find>recordingslist</find>
       <find>.wasm</find>
+      <find>durationInterval</find>
+      <find>console.</find>
+      <find>recorder</find>
     </findStrings>
     <replaceStrings>
-      <replace>mediaRecorder</replace>
       <replace>console.log</replace>
+      <replace>mediaRecorder</replace>
     </replaceStrings>
     <dirStrings>
       <dir>D:\github_chrou\encorderOgg</dir>
@@ -102,9 +103,9 @@
         <option value="$PROJECT_DIR$/encoderWorker.js" />
         <option value="$PROJECT_DIR$/recorder.js" />
         <option value="$PROJECT_DIR$/index.html" />
-        <option value="$PROJECT_DIR$/main.js" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/index.js" />
+        <option value="$PROJECT_DIR$/main.js" />
       </list>
     </option>
   </component>
@@ -165,12 +166,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1589959489413</updated>
-      <workItem from="1589959490742" duration="20224000" />
+      <workItem from="1589959490742" duration="21002000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="20224000" />
+    <option name="totallyTimeSpent" value="21002000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -190,7 +191,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" weight="0.329718" />
-      <window_info anchor="bottom" id="Terminal" weight="0.3286334" />
+      <window_info anchor="bottom" id="Terminal" weight="0.44034708" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -198,7 +199,7 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.3286334" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -271,34 +272,34 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="17" column="81" lean-forward="true" selection-start-line="17" selection-start-column="81" selection-end-line="17" selection-end-column="81" />
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SECOND">
+          <first_editor relative-caret-position="246">
+            <caret line="32" column="25" lean-forward="true" selection-start-line="32" selection-start-column="25" selection-end-line="32" selection-end-column="25" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index.js">
+    <entry file="file://$PROJECT_DIR$/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="29" column="56" lean-forward="true" selection-start-line="29" selection-start-column="56" selection-end-line="29" selection-end-column="56" />
+        <state relative-caret-position="575">
+          <caret line="62" column="71" lean-forward="true" selection-start-line="62" selection-start-column="71" selection-end-line="62" selection-end-column="71" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+        <state relative-caret-position="-425">
+          <caret line="7" column="25" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="25" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="571">
-            <caret line="45" lean-forward="true" selection-start-line="45" selection-end-line="45" />
-          </first_editor>
-          <second_editor />
+    <entry file="file://$PROJECT_DIR$/index.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="48" column="20" lean-forward="true" selection-start-line="48" selection-start-column="20" selection-end-line="48" selection-end-column="20" />
         </state>
       </provider>
     </entry>
