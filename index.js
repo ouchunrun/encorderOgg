@@ -22,12 +22,12 @@ fileInput.onchange = function () {
         progressCallback: progressCallback,
         doneCallBack:doneCallBack,
         errorCallBack: errorCallBack,
-        monitorGain: parseInt(monitorGain.value, 10),
-        recordingGain: parseInt(recordingGain.value, 10),
+        // monitorGain: parseInt(monitorGain.value, 10),
+        // recordingGain: parseInt(recordingGain.value, 10),
         numberOfChannels: parseInt(numberOfChannels.value, 10),
         encoderSampleRate: parseInt(encoderSampleRate.value, 10),
         encoderWorkerPath: 'encoderWorker.js',
-        OggOpusEncoderWasmPath: 'encoderWorker.wasm',
+        // OggOpusEncoderWasmPath: 'encoderWorker.wasm',
     })
 };
 
