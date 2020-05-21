@@ -8,7 +8,7 @@ let fileInput = document.getElementById('fileInput')
 fileInput.onchange = function () {
     encoderOgg({
         file: this.files[0],
-        duration: 30,
+        duration: 5,
         progressCallback: progressCallback,
         doneCallBack:doneCallBack,
         errorCallBack: errorCallBack,
@@ -28,7 +28,7 @@ fileInput.onchange = function () {
 function progressCallback(data){
     let progressShow = document.getElementById('progress')
     if(data.state === 'recording'){
-        progressShow.innerHTML = parseInt(data.percent * 100);
+        progressShow.innerHTML = Math.round(data.percent * 100);
     }else if(data.state === 'done'){
         progressShow.innerHTML = '100';
     }

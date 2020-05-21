@@ -48,5 +48,11 @@ progressCallback({state: 'recording', currentTime: currentTime})
 
 - recordingGain：可选，默认1， 
     
+##
 
+- 获取channelCount
+```
+ let tracks = this.stream.getAudioTracks();
+ let channelCount = tracks[0].getSettings().channelCount || 1;
+```
     
