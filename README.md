@@ -48,11 +48,16 @@ progressCallback({state: 'recording', currentTime: currentTime})
 
 - recordingGain：可选，默认1， 
     
-##
+## 其他
 
 - 获取channelCount
 ```
  let tracks = this.stream.getAudioTracks();
  let channelCount = tracks[0].getSettings().channelCount || 1;
 ```
-    
+
+## 参考
+
+- [opus-recorder](https://github.com/chris-rudmin/opus-recorder)
+
+- [如何实现前端录音功能](https://zhuanlan.zhihu.com/p/43710364)
