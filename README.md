@@ -61,3 +61,5 @@ progressCallback({state: 'recording', currentTime: currentTime})
 - [opus-recorder](https://github.com/chris-rudmin/opus-recorder)
 
 - [如何实现前端录音功能](https://zhuanlan.zhihu.com/p/43710364)
+
+- [音乐人必备知识 | 常见的音频格式有哪些？](https://www.bilibili.com/read/cv6126844/)

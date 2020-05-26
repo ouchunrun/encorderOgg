@@ -5,7 +5,13 @@ let AudioContext = window.AudioContext || window.webkitAudioContext
 let Recorder = function (config) {
   if (!Recorder.isRecordingSupported()) {
     if (config && config.recoderOptions && config.recoderOptions.errorCallBack) {
-      config.recoderOptions.errorCallBack({ message: 'AudioContext or WebAssembly is not supported' })
+      let message
+      if(!window.AudioContext){
+        message = Recorder.ERROR_MESSAGE.ERROR_CODE_1000.description
+      }else if(!window.WebAssembly){
+        message = Recorder.ERROR_MESSAGE.ERROR_CODE_1001.description
+      }
+      config.recoderOptions.errorCallBack({ message: message})
     }
     return
   }
@@ -33,6 +39,46 @@ let Recorder = function (config) {
   }, config)
 
   this.encodedSamplePosition = 0
+}
+
+Recorder.ERROR_MESSAGE = {
+  ERROR_CODE_1000: {
+    responseCode: 'AUDIOCONTEXT_NOT_SUPPORTED',
+    description: 'AudioContext is not supported !'
+  },
+  ERROR_CODE_1001: {
+    responseCode: 'WEBASSEMBLY_NOT_SUPPORTED',
+    description: 'WebAssembly not supported !'
+  },
+  ERROR_CODE_1002: {
+    responseCode: 'AUDIO_CONVERSION_NOT_SUPPORTED',
+    description: 'Audio conversion is not supported !'
+  },
+  ERROR_CODE_1003: {
+    responseCode: 'INVALID_PARAMETER',
+    description: 'Invalid parameter'
+  },
+  ERROR_CODE_1004: {
+    responseCode: 'FILE_OVERSIZE',
+    description: 'File size requirement does not exceed 9M !'
+  },
+  ERROR_CODE_1005: {
+    responseCode: 'MIN_TIME_NOT_SATISFIED',
+    description: 'File playing time does not reach the required minimum (3 second)'
+  },
+
+  ERROR_CODE_1006: {
+    responseCode: 'AUDIO_FORMAT_NOT_SUPPORTED',
+    description: 'Format not supported: unable to decode audio data'
+  },
+  ERROR_CODE_1007: {
+    responseCode: 'API_NOT_SUPPORTED',
+    description: 'AudioContext or WebAssembly is not supported'
+  },
+  ERROR_CODE_1008: {
+    responseCode: 'ONLY_AUDIO_SUPPORTED',
+    description: 'Only audio is supported!'
+  },
 }
 
 // Static Methods
@@ -223,10 +269,10 @@ Recorder.prototype.start = function (sourceNode) {
 Recorder.prototype.stop = function () {
   if (this.state !== 'inactive') {
     this.state = 'inactive'
-    this.monitorGainNode.disconnect()
-    this.scriptProcessorNode.disconnect()
-    this.recordingGainNode.disconnect()
-    this.sourceNode.disconnect()
+    this.monitorGainNode && this.monitorGainNode.disconnect()
+    this.scriptProcessorNode && this.scriptProcessorNode.disconnect()
+    this.recordingGainNode && this.recordingGainNode.disconnect()
+    this.sourceNode && this.sourceNode.disconnect()
     this.clearStream()
 
     let encoder = this.encoder

@@ -49,79 +49,123 @@ function createRecorder (data) {
  * @returns {Promise<void>}
  */
 // export default
-async function encoderOgg (data) {
+function encoderOgg (data) {
     let browser = Recorder.detectBrowser()
     if(browser.browser !== 'chrome' && browser.browser !== 'firefox' && !browser.chromeVersion){
-        data.errorCallBack({ message: 'Current browser does not support audio conversion, please use Chrome or Firefox try again!' })
+        data.errorCallBack({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1002.description })
+        return
+    }
+
+    /**
+     * 无效参数判断：判断是否传入必要参数
+     */
+    if(!data || !data.file || !data.doneCallBack){
+        console.warn(data)
+        data.errorCallBack({ message:  Recorder.ERROR_MESSAGE.ERROR_CODE_1003.description })
+        return
+    }
+    let file = data.file
+    console.log('current upload file type ' + file.type)
+
+    /**
+     * 判断是否为音频
+     */
+    if(!/audio\/\w+/.test(file.type)){
+        data.errorCallBack({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1008.description })
         return
     }
 
     let recorder
     let MIN_LIMIT = 3 // 文件时长不低于3秒
-    let MXA_LIMIT = 1048576 * 9 // 文件大小要求不超过9M
-    let file = data.file
+    let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
     if (file.size > MXA_LIMIT) {
-        data.errorCallBack({ message: 'File duration is too big!' })
+        data.errorCallBack({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1004.description})
         return
     }
     let durationInterval
-    let url = URL.createObjectURL(file)
-    let audioElement = new Audio(url)
-    audioElement.addEventListener('loadedmetadata', async function () {
-        let duration = audioElement.duration
-        if (duration < MIN_LIMIT) {
-            data.errorCallBack({ message: 'File duration is too short' })
-            return
-        }
-
-        fileReader.readAsArrayBuffer(file)
-        recorder = createRecorder(data)
-        recorder.fileName = file.name.replace(/\.[^\.]+$/, '')
-    })
-
+    let bufferSource
+    let mediaStreamSource
+    let recordingDuration
+    let audioCtx = new AudioContext()
     let fileReader = new FileReader()
-    fileReader.onload = async function (e) {
-        let fileBuffer = e.target.result
 
-        /* 通过AudioContext.createMediaStreamDestination 生成文件流 */
-        let audioCtx = new AudioContext()
-        let buffer = await audioCtx.decodeAudioData(fileBuffer)
-        let soundSource = audioCtx.createBufferSource()
-        soundSource.buffer = buffer
+    /**
+     * 监听结束事件:文件时长不足设定时长时
+     */
+    function bufferSourceOnEnded() {
+        if (recorder.state === 'recording' || recorder.state !== 'inactive') {
+            recorder.stop()
+            bufferSource && bufferSource.stop()
+            bufferSource = null
+            if (durationInterval) {
+                clearInterval(durationInterval)
+                data.progressCallback({ state: 'done', percent: 1 })
+            }
+        }
+    }
+
+    /**
+     * 录制时间到达设置时长时，停止录制
+     */
+    function recorderStopHandler() {
+        let currentTime = mediaStreamSource.context.currentTime
+        if (currentTime > recordingDuration) {
+            data.progressCallback({ state: 'done', percent: 1 })
+            recorder.stop()
+            bufferSource && bufferSource.stop()
+            bufferSource = null
+            clearInterval(durationInterval)
+        } else {
+            data.progressCallback({ state: 'recording', percent: currentTime / recordingDuration })
+        }
+    }
+
+    /**
+     * 创建 mediaStreamSource
+     * 通过AudioContext.createMediaStreamDestination 生成文件流
+     * @param decodedData
+     */
+    function createSourceNode(decodedData){
+        bufferSource = audioCtx.createBufferSource()
+        bufferSource.buffer = decodedData
+        bufferSource.onended = bufferSourceOnEnded
 
         let destination = audioCtx.createMediaStreamDestination()
-        let recordingDuration = Math.min(audioElement.duration, data.duration || 30) // 文件录制时长
-        soundSource.connect(destination)
-        soundSource.start()
+        recordingDuration = Math.min(data.duration || 30) // 文件录制时长
+        bufferSource.connect(destination)
+        bufferSource.start()
 
-        soundSource.onended = function () {
-            // 文件时长不足设定时长时，监听结束事件
-            if (recorder.state === 'recording' || recorder.state !== 'inactive') {
-                recorder.stop()
-                soundSource && soundSource.stop()
-                soundSource = null
-                if (durationInterval) {
-                    clearInterval(durationInterval)
-                    data.progressCallback({ state: 'done', percent: 1 })
-                }
-            }
-        }
-
-        let sourceNode = audioCtx.createMediaStreamSource(destination.stream)
-        // 录制时间到达设置时长时，停止录制
-        durationInterval = setInterval(function () {
-            let currentTime = sourceNode.context.currentTime
-            if (currentTime > recordingDuration) {
-                data.progressCallback({ state: 'done', percent: 1 })
-                recorder.stop()
-                soundSource && soundSource.stop()
-                soundSource = null
-                clearInterval(durationInterval)
-            } else {
-                data.progressCallback({ state: 'recording', percent: currentTime / recordingDuration })
-            }
-        }, 500)
-
-        recorder.start(sourceNode)
+        mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
+        durationInterval = setInterval(recorderStopHandler, 500)
+        recorder.start(mediaStreamSource)
     }
+
+    fileReader.onload = function () {
+        let buffer = this.result
+        audioCtx.decodeAudioData(buffer).then(function (decodedData) {
+            let duration = decodedData.duration
+            if (duration < MIN_LIMIT) {
+                data.errorCallBack({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1005.description })
+                return
+            }
+
+            createSourceNode(decodedData)
+        }, function (error) {
+            console.warn('*************** Error catch: ', error)
+            if(error.message === 'Unable to decode audio data'){
+                data.errorCallBack({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1006.description })
+            }else {
+                data.errorCallBack({ message: error.message })
+            }
+        })
+    }
+
+    fileReader.readAsArrayBuffer(file)
+    recorder = createRecorder(data)
+    recorder.fileName = file.name.replace(/\.[^\.]+$/, '')
 }
+
+// 全局错误如何处理？？
+window.addEventListener("error", function(error) {
+    console.error(error)
+}, true);
