@@ -36,11 +36,11 @@ let Recorder = function (config, data) {
 
 Recorder.ERROR_MESSAGE = {
   ERROR_CODE_1001: {
-    responseCode: 'INVALID_PARAMETER',  // 无效参数
+    responseCode: 'INVALID_PARAMETER', // 无效参数
     message: 'Invalid parameter'
   },
   ERROR_CODE_1002: {
-    responseCode: 'AUDIOCONTEXT_NOT_SUPPORTED',  // AudioContext 接口不支持
+    responseCode: 'AUDIOCONTEXT_NOT_SUPPORTED', // AudioContext 接口不支持
     message: 'AudioContext is not supported !'
   },
   ERROR_CODE_1003: {
@@ -48,15 +48,15 @@ Recorder.ERROR_MESSAGE = {
     message: 'WebAssembly not supported !'
   },
   ERROR_CODE_1004: {
-    responseCode: 'FILE_OVERSIZE',  // 上传文件超过限制
+    responseCode: 'FILE_OVERSIZE', // 上传文件超过限制
     message: 'File size requirement does not exceed 9M !'
   },
   ERROR_CODE_1005: {
-    responseCode: 'MIN_TIME_NOT_SATISFIED',  // 上传文件最短时长不满足要求：不低于3秒
+    responseCode: 'MIN_TIME_NOT_SATISFIED', // 上传文件最短时长不满足要求：不低于3秒
     message: 'File playing time does not reach the required minimum (3 second)'
   },
   ERROR_CODE_1006: {
-    responseCode: 'ONLY_AUDIO_SUPPORTED',  // 格式错误：只支持上传音频文件
+    responseCode: 'ONLY_AUDIO_SUPPORTED', // 格式错误：只支持上传音频文件
     message: 'Only audio is supported!'
   },
   ERROR_CODE_1007: {
@@ -64,8 +64,8 @@ Recorder.ERROR_MESSAGE = {
     message: 'Audio conversion is not supported in current browser!'
   },
   ERROR_CODE_1008: {
-    responseCode: 'FORMAT_CONVERSION_ERROR',  // 音频格式转换失败， .mid和部分 .wma 文件等无法正常转码
-    message: 'CONVERSION ERROR: unable to decode audio data!: {0}'
+    responseCode: 'FORMAT_CONVERSION_ERROR', // 音频格式转换失败， .mid和部分 .wma 文件等无法正常转码
+    message: 'CONVERSION ERROR: unable to decode audio data!'
   },
   // 其他未知错误
   ERROR_CODE_1009: function (error) {
@@ -247,9 +247,9 @@ Recorder.prototype.start = function (sourceNode) {
     this.encodedSamplePosition = 0
 
     return Promise.all([this.initSourceNode(sourceNode), this.initWorker()]).then((results) => {
-      if(!results[0]){
-        console.warn("this.recoderOptions: ",this.recoderOptions)
-        this.recoderOptions && this.recoderOptions.errorCallBack({ 'message': Recorder.ERROR_MESSAGE.ERROR_CODE_1008})
+      if (!results[0]) {
+        console.warn('this.recoderOptions: ', this.recoderOptions)
+        this.recoderOptions && this.recoderOptions.errorCallBack({ 'message': Recorder.ERROR_MESSAGE.ERROR_CODE_1008 })
         return
       }
       this.sourceNode = results[0]
@@ -272,7 +272,7 @@ Recorder.prototype.stop = function () {
     this.clearStream()
 
     let encoder = this.encoder
-    if(encoder){
+    if (encoder) {
       return new Promise((resolve) => {
         let callback = (e) => {
           if (e['data']['message'] === 'done') {
@@ -286,8 +286,8 @@ Recorder.prototype.stop = function () {
           encoder.postMessage({ command: 'close' })
         }
       })
-    }else {
-      if(Recorder.recoderOptions && Recorder.recoderOptions.errorCallback){
+    } else {
+      if (Recorder.recoderOptions && Recorder.recoderOptions.errorCallback) {
         Recorder.recoderOptions.errorCallback({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1009() })
       }
     }
@@ -339,7 +339,7 @@ Recorder.prototype.onstop = function () {}
 /**
  * 判断浏览器类型和版本信息
  */
-function getBrowserDetails() {
+Recorder.getBrowserDetails = function () {
   let navigator = window && window.navigator
   let result = {}
   result.browser = null
@@ -365,31 +365,31 @@ function getBrowserDetails() {
   let getBrowserType = function () {
     let browser
 
-    if(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)){
+    if (navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
       console.log('Edge')
       browser = 'edge'
-    }else if((!!window.ActiveXObject || 'ActiveXObject' in window || navigator.userAgent.match(/MSIE (\d+)/) || navigator.userAgent.match(/rv:(\d+)/))){
-      console.log('IE')
-      browser = 'ie'
-    }  else if(navigator.userAgent.indexOf("Chrome")>-1 && navigator.userAgent.indexOf("Safari")>-1 && navigator.userAgent.indexOf("Edge")===-1 && navigator.userAgent.indexOf("OPR")===-1){
-      console.log('Chrome')
-      browser = 'chrome'
-    }else if(navigator.userAgent.indexOf("Opera")>-1 || navigator.userAgent.indexOf("OPR") > -1){
-      console.log('opera')
-      browser = 'Opera'
-    }else if(navigator.userAgent.indexOf("Firefox") > -1){
+    } else if (navigator.userAgent.indexOf('Firefox') > -1) {
       console.log('Firefox')
       browser = 'firefox'
-    }else if(navigator.userAgent.indexOf("Safari")>-1 && navigator.userAgent.indexOf("Chrome")===-1 && navigator.userAgent.indexOf("Edge")===-1 && navigator.userAgent.indexOf("OPR")===-1){
+    } else if (navigator.userAgent.indexOf('Opera') > -1 || navigator.userAgent.indexOf('OPR') > -1) {
+      console.log('opera')
+      browser = 'Opera'
+    } else if (navigator.userAgent.indexOf('Chrome') > -1 && navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Edge') === -1 && navigator.userAgent.indexOf('OPR') === -1) {
+      console.log('Chrome')
+      browser = 'chrome'
+    } else if (navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Edge') === -1 && navigator.userAgent.indexOf('OPR') === -1) {
       console.log('Safari')
       browser = 'safari'
-    }else if (navigator.userAgent.match(/AppleWebKit\/([0-9]+)\./) && navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
+    } else if (navigator.userAgent.match(/AppleWebKit\/([0-9]+)\./) && navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
       // Safari UA substrings of interest for reference:
       // - webkit version:           AppleWebKit/602.1.25 (also used in Op,Cr)
       // - safari UI version:        Version/9.0.3 (unique to Safari)
       // - safari UI webkit version: Safari/601.4.4 (also used in Op,Cr)
       console.log('Safari')
-      result.browser = 'safari';
+      result.browser = 'safari'
+    } else if ((navigator.userAgent.indexOf('compatible') > -1 && navigator.userAgent.indexOf('MSIE') > -1) || (navigator.userAgent.indexOf('Trident') > -1 && navigator.userAgent.indexOf('rv:11.0') > -1)) {
+      console.log('IE')
+      browser = 'ie'
     } else {
       console.log('navigator.userAgent: ', navigator.userAgent)
     }
