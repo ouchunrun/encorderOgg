@@ -1,4 +1,4 @@
-let audio = document.getElementById('audio');
+let audio = document.getElementById('localAudio');
 let link = document.getElementById('linkA')
 /**
  * 文件上传
@@ -53,5 +53,5 @@ function doneCallBack(file, blob){
  * @param error
  */
 function errorCallBack(error) {
-    alert(error.message)
+    alert(error.message.message)
 }

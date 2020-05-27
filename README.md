@@ -1,4 +1,41 @@
-## 功能
+## 说明
+
+### 浏览器版本
+
+#### 支持的浏览器版本
+
+|浏览器类型          |支持版本      |
+|--------------------|--------------|
+| chrome             | 58+          |
+| opera              | 45+          |
+|firefox             |25+           |
+
+
+> 以上版本为测试的最低版本，自测可以正常转码！
+
+#### 其他浏览器
+
+|浏览器类型    |版本      |浏览器内核  | 是否支持|
+|--------------|----------|------------|---------|
+|360安全浏览器 | 63       | chrome     |支持     |
+|搜狗浏览器    | 58       | chrome     |支持     |
+|QQ浏览器      | 70       | chrome     |支持     |
+
+> 以上为测试的版本，对应的其他版本，没有验证
+
+
+#### 不支持的浏览器
+
+- IE not support
+
+- Edge not support (老的edge)
+
+- Safari not support
+
+
+
+
+### 格式与限制
 
 - 音频文件转换为ogg格式文件，采样率 16K， 单声道
 
@@ -6,29 +43,23 @@
 
 > 文件大小不超过9M
 
-## 使用文件：
+### 涉及文件
 
-- main.js
+- EncoderOgg.js
 - recorder.js
 - encoderWorker.js
 - encoderWorker.wasm
 
 
-## encoderOgg 参数说明 
+### 参数说明 
 
 - file：上传文件
-
 
 - duration： 文件录制时长，单位（秒）
 
 - progressCallback 回调参数
     - state："done" 表示转换结束， "recording" 表示还在处理中
-    - currentTime： 当前转换时间。调用示例：
-```
-progressCallback({state: 'done'})
-
-progressCallback({state: 'recording', currentTime: currentTime})
-```
+    - percent： 转换进度
 
 - doneCallBack  文件转换完成的回调
 
@@ -41,22 +72,38 @@ progressCallback({state: 'recording', currentTime: currentTime})
 - encoderWorkerPath： encoderWorker.js 路径
   
 - OggOpusEncoderWasmPath：wasm 路径
-    - 文件使用位置：encoderWorker.js[1648 行]：wasmBinaryFile
-    - 与 encoderWorker.js 路径保持一致
 
 - monitorGain：可选，默认0
 
 - recordingGain：可选，默认1， 
-    
-## 其他
+   
+   
+### 调用示例：
 
-- 获取channelCount
-```
- let tracks = this.stream.getAudioTracks();
- let channelCount = tracks[0].getSettings().channelCount || 1;
-```
+```javascript
+/**
+ * 文件上传
+ * @type {HTMLElement}
+ */
+let fileInput = document.getElementById('fileInput')
+fileInput.onchange = function () {
+    encoderOgg({
+        file: this.files[0],
+        duration: 30,
+        progressCallback: progressCallback,
+        doneCallBack:doneCallBack,
+        errorCallBack: errorCallBack,
+        monitorGain: parseInt(monitorGain.value, 10),
+        recordingGain: parseInt(recordingGain.value, 10),
+        numberOfChannels: parseInt(numberOfChannels.value, 10),
+        encoderSampleRate: parseInt(encoderSampleRate.value, 10),
+        encoderWorkerPath: '/to-ogg-worker/encoderWorker.js',
+    })
+    fileInput.value = "";  // clear input
+};
+``` 
 
-## 参考
+### 参考
 
 - [opus-recorder](https://github.com/chris-rudmin/opus-recorder)
 

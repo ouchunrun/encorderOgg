@@ -2,17 +2,9 @@
 
 let AudioContext = window.AudioContext || window.webkitAudioContext
 // Constructor
-let Recorder = function (config) {
+let Recorder = function (config, data) {
   if (!Recorder.isRecordingSupported()) {
-    if (config && config.recoderOptions && config.recoderOptions.errorCallBack) {
-      let message
-      if(!window.AudioContext){
-        message = Recorder.ERROR_MESSAGE.ERROR_CODE_1000.description
-      }else if(!window.WebAssembly){
-        message = Recorder.ERROR_MESSAGE.ERROR_CODE_1001.description
-      }
-      config.recoderOptions.errorCallBack({ message: message})
-    }
+    console.error('AudioContext or WebAssembly is not supported')
     return
   }
 
@@ -39,46 +31,49 @@ let Recorder = function (config) {
   }, config)
 
   this.encodedSamplePosition = 0
+  this.recoderOptions = data
 }
 
 Recorder.ERROR_MESSAGE = {
-  ERROR_CODE_1000: {
-    responseCode: 'AUDIOCONTEXT_NOT_SUPPORTED',
-    description: 'AudioContext is not supported !'
-  },
   ERROR_CODE_1001: {
-    responseCode: 'WEBASSEMBLY_NOT_SUPPORTED',
-    description: 'WebAssembly not supported !'
+    responseCode: 'INVALID_PARAMETER',  // 无效参数
+    message: 'Invalid parameter'
   },
   ERROR_CODE_1002: {
-    responseCode: 'AUDIO_CONVERSION_NOT_SUPPORTED',
-    description: 'Audio conversion is not supported !'
+    responseCode: 'AUDIOCONTEXT_NOT_SUPPORTED',  // AudioContext 接口不支持
+    message: 'AudioContext is not supported !'
   },
   ERROR_CODE_1003: {
-    responseCode: 'INVALID_PARAMETER',
-    description: 'Invalid parameter'
+    responseCode: 'WEBASSEMBLY_NOT_SUPPORTED', // WebAssembly 接口不支持
+    message: 'WebAssembly not supported !'
   },
   ERROR_CODE_1004: {
-    responseCode: 'FILE_OVERSIZE',
-    description: 'File size requirement does not exceed 9M !'
+    responseCode: 'FILE_OVERSIZE',  // 上传文件超过限制
+    message: 'File size requirement does not exceed 9M !'
   },
   ERROR_CODE_1005: {
-    responseCode: 'MIN_TIME_NOT_SATISFIED',
-    description: 'File playing time does not reach the required minimum (3 second)'
+    responseCode: 'MIN_TIME_NOT_SATISFIED',  // 上传文件最短时长不满足要求：不低于3秒
+    message: 'File playing time does not reach the required minimum (3 second)'
   },
-
   ERROR_CODE_1006: {
-    responseCode: 'AUDIO_FORMAT_NOT_SUPPORTED',
-    description: 'Format not supported: unable to decode audio data'
+    responseCode: 'ONLY_AUDIO_SUPPORTED',  // 格式错误：只支持上传音频文件
+    message: 'Only audio is supported!'
   },
   ERROR_CODE_1007: {
-    responseCode: 'API_NOT_SUPPORTED',
-    description: 'AudioContext or WebAssembly is not supported'
+    responseCode: 'BROWSER_CONVERSION_NOT_SUPPORTED', // 当前浏览器不支持音频转换：比如safari
+    message: 'Audio conversion is not supported in current browser!'
   },
   ERROR_CODE_1008: {
-    responseCode: 'ONLY_AUDIO_SUPPORTED',
-    description: 'Only audio is supported!'
+    responseCode: 'FORMAT_CONVERSION_ERROR',  // 音频格式转换失败， .mid和部分 .wma 文件等无法正常转码
+    message: 'CONVERSION ERROR: unable to decode audio data!: {0}'
   },
+  // 其他未知错误
+  ERROR_CODE_1009: function (error) {
+    return {
+      responseCode: 'UNKNOWN_ERROR',
+      message: 'CONVERSION ERROR: ' + error || 'unknown error'
+    }
+  }
 }
 
 // Static Methods
@@ -157,11 +152,7 @@ Recorder.prototype.initSourceNode = function (sourceNode) {
   if (sourceNode && sourceNode.context) {
     return window.Promise.resolve(sourceNode)
   }
-
-  return window.navigator.mediaDevices.getUserMedia({ audio: this.config.mediaTrackConstraints }).then((stream) => {
-    this.stream = stream
-    return this.audioContext.createMediaStreamSource(stream)
-  })
+  return null
 }
 
 Recorder.prototype.loadWorker = function () {
@@ -256,6 +247,11 @@ Recorder.prototype.start = function (sourceNode) {
     this.encodedSamplePosition = 0
 
     return Promise.all([this.initSourceNode(sourceNode), this.initWorker()]).then((results) => {
+      if(!results[0]){
+        console.warn("this.recoderOptions: ",this.recoderOptions)
+        this.recoderOptions && this.recoderOptions.errorCallBack({ 'message': Recorder.ERROR_MESSAGE.ERROR_CODE_1008})
+        return
+      }
       this.sourceNode = results[0]
       this.state = 'recording'
       this.onstart()
@@ -276,19 +272,25 @@ Recorder.prototype.stop = function () {
     this.clearStream()
 
     let encoder = this.encoder
-    return new Promise((resolve) => {
-      let callback = (e) => {
-        if (e['data']['message'] === 'done') {
-          encoder.removeEventListener('message', callback)
-          resolve()
+    if(encoder){
+      return new Promise((resolve) => {
+        let callback = (e) => {
+          if (e['data']['message'] === 'done') {
+            encoder.removeEventListener('message', callback)
+            resolve()
+          }
         }
+        encoder.addEventListener('message', callback)
+        encoder.postMessage({ command: 'done' })
+        if (!this.config.reuseWorker) {
+          encoder.postMessage({ command: 'close' })
+        }
+      })
+    }else {
+      if(Recorder.recoderOptions && Recorder.recoderOptions.errorCallback){
+        Recorder.recoderOptions.errorCallback({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1009() })
       }
-      encoder.addEventListener('message', callback)
-      encoder.postMessage({ command: 'done' })
-      if (!this.config.reuseWorker) {
-        encoder.postMessage({ command: 'close' })
-      }
-    })
+    }
   }
   return Promise.resolve()
 }
@@ -334,60 +336,99 @@ Recorder.prototype.onresume = function () {}
 Recorder.prototype.onstart = function () {}
 Recorder.prototype.onstop = function () {}
 
-Recorder.detectBrowser = function () {
+/**
+ * 判断浏览器类型和版本信息
+ */
+function getBrowserDetails() {
   let navigator = window && window.navigator
   let result = {}
   result.browser = null
   result.version = null
   result.chromeVersion = null
-  if (typeof window === 'undefined' || !window.navigator) {
-    result.browser = 'Not a browser.'
-    return result
-  }
 
-  let extractVersion = function (uastring, expr, pos) {
+  /**
+   * 获取浏览器版本
+   * @param uastring
+   * @param expr
+   * @param pos
+   * @returns {RegExpMatchArray | Promise<Response | undefined> | boolean | number}
+   */
+  let getBrowserVersion = function (uastring, expr, pos) {
     var match = uastring.match(expr)
     return match && match.length >= pos && parseInt(match[pos], 10)
   }
 
-  if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
-    result.browser = 'edge'
-    result.version = extractVersion(navigator.userAgent, /Edge\/(\d+).(\d+)$/, 2)
-  } else if (!navigator.mediaDevices && (!!window.ActiveXObject || 'ActiveXObject' in window || navigator.userAgent.match(/MSIE (\d+)/) || navigator.userAgent.match(/rv:(\d+)/))) {
-    result.browser = 'ie'
-    if (navigator.userAgent.match(/MSIE (\d+)/)) {
-      result.version = extractVersion(navigator.userAgent, /MSIE (\d+).(\d+)/, 1)
-    } else if (navigator.userAgent.match(/rv:(\d+)/)) {
-      result.version = extractVersion(navigator.userAgent, /rv:(\d+).(\d+)/, 1)
-    }
-  } else if (navigator.mozGetUserMedia) {
-    result.browser = 'firefox'
-    result.version = extractVersion(navigator.userAgent, /Firefox\/(\d+)\./, 1)
-  } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
-    let isOpera = !!navigator.userAgent.match(/(OPR|Opera).([\d.]+)/)
-    if (isOpera) {
-      result.browser = 'opera'
-      result.version = extractVersion(navigator.userAgent, /O(PR|pera)\/(\d+)\./, 2)
-      if (navigator.userAgent.match(/Chrom(e|ium)\/([\d.]+)/)[2]) {
-        result.chromeVersion = extractVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
-      }
+  /**
+   * 获取浏览器类型
+   * @returns {string}
+   */
+  let getBrowserType = function () {
+    let browser
+
+    if(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)){
+      console.log('Edge')
+      browser = 'edge'
+    }else if((!!window.ActiveXObject || 'ActiveXObject' in window || navigator.userAgent.match(/MSIE (\d+)/) || navigator.userAgent.match(/rv:(\d+)/))){
+      console.log('IE')
+      browser = 'ie'
+    }  else if(navigator.userAgent.indexOf("Chrome")>-1 && navigator.userAgent.indexOf("Safari")>-1 && navigator.userAgent.indexOf("Edge")===-1 && navigator.userAgent.indexOf("OPR")===-1){
+      console.log('Chrome')
+      browser = 'chrome'
+    }else if(navigator.userAgent.indexOf("Opera")>-1 || navigator.userAgent.indexOf("OPR") > -1){
+      console.log('opera')
+      browser = 'Opera'
+    }else if(navigator.userAgent.indexOf("Firefox") > -1){
+      console.log('Firefox')
+      browser = 'firefox'
+    }else if(navigator.userAgent.indexOf("Safari")>-1 && navigator.userAgent.indexOf("Chrome")===-1 && navigator.userAgent.indexOf("Edge")===-1 && navigator.userAgent.indexOf("OPR")===-1){
+      console.log('Safari')
+      browser = 'safari'
+    }else if (navigator.userAgent.match(/AppleWebKit\/([0-9]+)\./) && navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
+      // Safari UA substrings of interest for reference:
+      // - webkit version:           AppleWebKit/602.1.25 (also used in Op,Cr)
+      // - safari UI version:        Version/9.0.3 (unique to Safari)
+      // - safari UI webkit version: Safari/601.4.4 (also used in Op,Cr)
+      console.log('Safari')
+      result.browser = 'safari';
     } else {
-      result.browser = 'chrome'
-      result.version = extractVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
+      console.log('navigator.userAgent: ', navigator.userAgent)
     }
-  } else if ((!navigator.webkitGetUserMedia && navigator.userAgent.match(/AppleWebKit\/([0-9]+)\./)) || (navigator.webkitGetUserMedia && !navigator.webkitRTCPeerConnection)) {
-    if (navigator.userAgent.match(/Version\/(\d+).(\d+)/)) {
-      result.browser = 'safari'
-      result.version = extractVersion(navigator.userAgent, /AppleWebKit\/(\d+)\./, 1)
-    } else { // unknown webkit-based browser.
-      result.browser = 'Unsupported webkit-based browser with GUM support but no WebRTC support.'
-      return result
-    }
-  } else {
-    result.browser = 'Not a supported browser.'
-    return result
+
+    return browser
   }
 
+  result.browser = getBrowserType()
+  switch (result.browser) {
+    case 'chrome':
+      result.version = getBrowserVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
+      break
+    case 'opera':
+      result.version = getBrowserVersion(navigator.userAgent, /O(PR|pera)\/(\d+)\./, 2)
+      if (navigator.userAgent.match(/Chrom(e|ium)\/([\d.]+)/)[2]) {
+        result.chromeVersion = getBrowserVersion(navigator.userAgent, /Chrom(e|ium)\/(\d+)\./, 2)
+      }
+      break
+    case 'firefox':
+      result.version = getBrowserVersion(navigator.userAgent, /Firefox\/(\d+)\./, 1)
+      break
+    case 'edge':
+      result.version = getBrowserVersion(navigator.userAgent, /Edge\/(\d+).(\d+)$/, 2)
+      break
+    case 'safari':
+      result.version = getBrowserVersion(navigator.userAgent, /AppleWebKit\/(\d+)\./, 1)
+      break
+    case 'ie':
+      if (navigator.userAgent.match(/MSIE (\d+)/)) {
+        result.version = getBrowserVersion(navigator.userAgent, /MSIE (\d+).(\d+)/, 1)
+      } else if (navigator.userAgent.match(/rv:(\d+)/)) {
+        result.version = getBrowserVersion(navigator.userAgent, /rv:(\d+).(\d+)/, 1)
+      }
+      break
+    default:
+      break
+  }
+
+  console.log('getBrowserDetails', result)
   return result
 }
 
