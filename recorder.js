@@ -249,7 +249,7 @@ Recorder.prototype.start = function (sourceNode) {
     return Promise.all([this.initSourceNode(sourceNode), this.initWorker()]).then((results) => {
       if (!results[0]) {
         console.warn('this.recoderOptions: ', this.recoderOptions)
-        this.recoderOptions && this.recoderOptions.errorCallBack({ 'message': Recorder.ERROR_MESSAGE.ERROR_CODE_1008 })
+        this.recoderOptions && this.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
         return
       }
       this.sourceNode = results[0]
@@ -288,7 +288,7 @@ Recorder.prototype.stop = function () {
       })
     } else {
       if (Recorder.recoderOptions && Recorder.recoderOptions.errorCallback) {
-        Recorder.recoderOptions.errorCallback({ message: Recorder.ERROR_MESSAGE.ERROR_CODE_1009() })
+        Recorder.recoderOptions.errorCallback(Recorder.ERROR_MESSAGE.ERROR_CODE_1009())
       }
     }
   }

@@ -53,5 +53,5 @@ function doneCallBack(file, blob){
  * @param error
  */
 function errorCallBack(error) {
-    alert(error.message.message)
+    alert(error.message)
 }
