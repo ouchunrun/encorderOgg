@@ -2,6 +2,7 @@ let fileList = document.getElementById('List')
 let safariFileInput = document.getElementById('safariFileInput')
 let fileName
 let recorder
+let arrayBuffer
 
 /**
  * 文件上传
@@ -13,7 +14,7 @@ safariFileInput.onchange = function () {
 
     let fileReader = new FileReader()
     fileReader.onload = function () {
-        let arrayBuffer =  this.result
+        arrayBuffer =  this.result
         console.log('this.result ArrayBuffer is: ', arrayBuffer)
 
         let blob = new Blob([new Int8Array(arrayBuffer)]);
@@ -21,15 +22,78 @@ safariFileInput.onchange = function () {
         console.log("blobURL: ", blobURL)
         // createDownloadLink(blob, fileName)
 
-        // 处理数据
-        AudioBufferProcess(arrayBuffer)
         // createBuffer 创建AudioBuffer
         encode(arrayBuffer)
+
+        // 处理数据
+        AudioBufferProcess(arrayBuffer)
     }
 
     fileReader.readAsArrayBuffer(file)
     safariFileInput.value = "";  // clear input
-};
+}
+
+/**
+ * This function converts an ArrayBuffer to Float32Array
+ * @param buffer
+ * @returns {Float32Array}
+ */
+function convertBlock(buffer) { // incoming data is an ArrayBuffer
+    var incomingData = new Uint8Array(buffer); // create a uint8 view on the ArrayBuffer
+    var i, l = incomingData.length; // length, we need this for the loop
+    var outputData = new Float32Array(incomingData.length); // create the Float32Array for output
+    for (i = 0; i < l; i++) {
+        outputData[i] = (incomingData[i] - 128) / 128.0; // convert audio to float
+    }
+    return outputData; // return the Float32Array
+}
+
+/**
+ * createBuffer创建AudioBuffer
+ * 会持续10秒：sampleRate*5 / sampleRate = 5 秒。
+ * @param buffers
+ */
+function encode( buffers ) {
+    /**
+     * Error: byte length of Float32Array should be a multiple of 4 at new Float32Array
+     * 原因：ArrayBuffer的大小应该是4的倍数
+     * @type {Float32Array}
+     */
+    buffers = convertBlock(buffers)
+    let float32Array = new Float32Array(buffers);
+    console.warn("float32Array: ", float32Array)
+    window.test = float32Array
+
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    console.warn(audioCtx)
+    let channels = 2
+    let frameCount = audioCtx.sampleRate * 5
+    let myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate)
+
+    for (let channel = 0; channel < channels; channel++) {
+        let nowBuffering = myArrayBuffer.getChannelData(channel)
+        console.warn("nowBuffering: ", nowBuffering)
+        for (let  i = 0; i < frameCount; i++) {
+            nowBuffering[i] = Math.random() * 2 - 1;
+            // nowBuffering[i] = float32Array[i]
+        }
+    }
+
+    let source = audioCtx.createBufferSource();
+    // set the buffer in the AudioBufferSourceNode
+    source.buffer = myArrayBuffer;
+    source.onended = function(){
+        console.warn("createBufferSource onended!")
+        recorder.stop()
+    }
+    let destination = audioCtx.createMediaStreamDestination()
+    source.connect(destination)
+    source.start();
+
+    let mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
+    console.warn("mediaStreamSource: ", mediaStreamSource)
+    encoderOgg2(mediaStreamSource)
+}
 
 /**
  * 尝试把 ArrayBuffer 数据处理为 AudioBuffer，兼容safari
@@ -50,42 +114,6 @@ function AudioBufferProcess(arrayBuffer) {
         }
         tmpBufferList.push(tmpBuffer)
     }
-    console.warn("tmpBufferList: ", tmpBufferList)
-}
-
-/**
- * createBuffer创建AudioBuffer
- * 会持续10秒：sampleRate*10 / sampleRate = 10 秒。
- * @param buffers
- */
-function encode( buffers ) {
-    let  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let  channels = audioCtx.channelCount || 1
-    let  frameCount = audioCtx.sampleRate * 10.0
-    let  myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate)
-
-    for (let  channel = 0; channel < channels; channel++) {
-        let  nowBuffering = myArrayBuffer.getChannelData(channel)
-        for (let  i = 0; i < frameCount; i++) {
-            nowBuffering[i] = Math.random() * 2 - 1;
-        }
-    }
-
-    console.warn("myArrayBuffer: ", myArrayBuffer)
-    let source = audioCtx.createBufferSource();
-    // set the buffer in the AudioBufferSourceNode
-    source.buffer = myArrayBuffer;
-    source.onended = function(){
-        console.warn("createBufferSource onended!")
-        recorder.stop()
-    }
-    let destination = audioCtx.createMediaStreamDestination()
-    source.connect(destination)
-    source.start();
-
-    let mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
-    console.warn("mediaStreamSource: ", mediaStreamSource)
-    encoderOgg2(mediaStreamSource)
 }
 
 /**
@@ -99,16 +127,12 @@ function encoderOgg2(mediaStreamSource) {
             console.warn("progressCallback: ", data)
         },
         doneCallBack: function (file, blob) {
-            console.warn("转换完成: ", blob)
+            console.warn("转换完成！！")
             let dataBlob = new Blob([blob], {type: 'audio/ogg'});
-            let url = URL.createObjectURL(dataBlob);
-            audio.src = url;
-            link.href = url;
-            link.download = file.name;
-            link.innerHTML = link.download;
+            createDownloadLink(dataBlob,file.name)
         },
         errorCallBack: function (data) {
-            console.warn('errorCallBack ', data)
+            console.error('errorCallBack ', data)
         },
         monitorGain: parseInt(monitorGain.value, 10),
         recordingGain: parseInt(recordingGain.value, 10),
