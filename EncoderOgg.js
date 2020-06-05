@@ -143,17 +143,21 @@ function encoderOgg (data) {
      */
     function createSourceNode (decodedData) {
         try {
+            // 创建一个新的AudioBufferSourceNode接口, 该接口可以通过AudioBuffer 对象来播放音频数据
             bufferSource = audioCtx.createBufferSource()
             bufferSource.buffer = decodedData
             bufferSource.onended = bufferSourceOnEnded
 
+            // 创建一个媒体流的节点
             let destination = audioCtx.createMediaStreamDestination()
             recordingDuration = Math.min(data.duration || 30) // 文件录制时长
             bufferSource.connect(destination)
             bufferSource.start()
 
+            // 创建一个新的MediaStreamAudioSourceNode 对象
             mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
             durationInterval = setInterval(recorderStopHandler, 500)
+
             recorder.start(mediaStreamSource)
         } catch (e) {
             data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(e))
