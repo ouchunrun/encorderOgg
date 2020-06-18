@@ -187,7 +187,12 @@ function encoderOgg (data) {
 
         fileReader.readAsArrayBuffer(file)
         recorder = createRecorder(data)
-        recorder.fileName = file.name.replace(/\.[^\.]+$/, '')
+        let defaultRing = ['ring1', 'ring2', 'ring3', 'ring4', 'ring5', 'ring6', 'slient']
+        let fileName = file.name.replace(/\.[^\.]+$/, '')
+        if(defaultRing.includes(fileName)){
+            fileName = 'cust_' + fileName
+        }
+        recorder.fileName = fileName
     } catch (e) {
         data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(e))
     }
